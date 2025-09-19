@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Lost & Found Portal</title>
+    <link rel="stylesheet" href="/styles.css?v=2">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>⚙️ Admin Dashboard</h1>
+            <nav class="nav">
+                <a href="/student">Student View</a>
+                <span style="color: #ecf0f1;">Admin Dashboard</span>
+                <a href="/admin" onclick="logout()">Logout</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('add-item')">Add New Item</button>
+            <button class="tab" onclick="showTab('manage-items')">Manage Items</button>
+            <button class="tab" onclick="showTab('statistics')">Statistics</button>
+            <button class="tab" onclick="showTab('settings')">Settings</button>
+        </div>
+
+        <!-- Add Item Tab -->
+        <div id="add-item-tab" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    Add New Lost Item
+                </div>
+                <div class="card-body">
+                    <div id="add-alert-container"></div>
+                    
+                    <form id="add-item-form" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="description">Item Description: *</label>
+                            <input type="text" id="description" name="description" class="form-control" 
+                                   placeholder="e.g., Blue water bottle with university logo" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="foundLocation">Where was it found: *</label>
+                            <input type="text" id="foundLocation" name="foundLocation" class="form-control" 
+                                   placeholder="e.g., Library Reading Room, Table 5" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="collectionLocation">Where to collect: *</label>
+                            <input type="text" id="collectionLocation" name="collectionLocation" class="form-control" 
+                                   placeholder="e.g., Admin Office, Room 101" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="image">Item Photo:</label>
+                            <input type="file" id="image" name="image" class="form-control" accept="image/*">
+                            <small style="color: #666; margin-top: 0.5rem; display: block;">
+                                Optional - Upload a clear photo of the item (max 5MB)
+                            </small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success" id="add-item-btn">Add Item</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manage Items Tab -->
+        <div id="manage-items-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    Current Lost Items - Mark as Collected
+                </div>
+                <div class="card-body">
+                    <!-- Date Filter Section -->
+                    <div class="filter-section">
+                        <h3>Filter by Date</h3>
+                        <div class="date-filter">
+                            <label for="admin-date-from">From:</label>
+                            <input type="date" id="admin-date-from">
+                            <label for="admin-date-to">To:</label>
+                            <input type="date" id="admin-date-to">
+                            <button onclick="applyAdminDateFilter()" class="btn btn-secondary">Filter</button>
+                            <button onclick="clearAdminDateFilter()" class="btn btn-secondary">Clear</button>
+                        </div>
+                    </div>
+                    <div id="manage-alert-container"></div>
+                    <div id="manage-items" class="loading">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Tab -->
+        <div id="statistics-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    Statistics Dashboard
+                </div>
+                <div class="card-body">
+                    <div class="stats-container">
+                        <div class="stats-summary">
+                            <div class="stat-card">
+                                <h3 id="admin-total-current">0</h3>
+                                <p>Current Items</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3 id="admin-total-archived">0</h3>
+                                <p>Archived Items</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3 id="admin-total-collected">0</h3>
+                                <p>Collected Items</p>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <h3>Items Lost Per Month</h3>
+                            <canvas id="adminMonthlyChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    Admin Settings
+                </div>
+                <div class="card-body">
+                    <div id="settings-alert-container"></div>
+                    
+                    <h3>Change Admin Password</h3>
+                    <form id="change-password-form">
+                        <div class="form-group">
+                            <label for="current-password">Current Password:</label>
+                            <input type="password" id="current-password" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password">New Password:</label>
+                            <input type="password" id="new-password" class="form-control" required minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm-password">Confirm New Password:</label>
+                            <input type="password" id="confirm-password" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="change-password-btn">Change Password</button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Collection Modal -->
+    <div id="collection-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: 8px; max-width: 400px; width: 90%;">
+            <h3 style="margin: 0 0 1rem 0;">Mark Item as Collected</h3>
+            <p id="item-description" style="color: #666; margin-bottom: 1.5rem;"></p>
+            
+            <div class="form-group">
+                <label for="student-name">Student Name: *</label>
+                <input type="text" id="student-name" class="form-control" placeholder="Enter the student's full name" required>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+                <button class="btn" onclick="closeCollectionModal()" style="background: #6c757d;">Cancel</button>
+                <button class="btn btn-success" onclick="confirmCollection()" id="confirm-collection-btn">Mark as Collected</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let allCurrentItems = [];
+        let allArchivedItems = [];
+        let allCollectedItems = [];
+        let adminMonthlyChart = null;
+
+        // Tab functionality
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabName === 'manage-items') {
+                loadManageItems();
+            } else if (tabName === 'statistics') {
+                loadStatistics();
+            } else if (tabName === 'settings') {
+                // Settings tab doesn't need special loading
+            }
+        }
+
+        function showAlert(message, type = 'error', containerId = 'add-alert-container') {
+            const alertContainer = document.getElementById(containerId);
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
+            
+            alertContainer.innerHTML = `
+                <div class="alert ${alertClass}">
+                    ${message}
+                </div>
+            `;
+
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/admin';
+            }
+        }
+
+        // Add item form handler
+        document.getElementById('add-item-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const addBtn = document.getElementById('add-item-btn');
+            const formData = new FormData(e.target);
+
+            addBtn.textContent = 'Adding Item...';
+            addBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/items', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert('Item added successfully!', 'success');
+                    e.target.reset();
+                    // Refresh manage items if that tab is open
+                    if (document.getElementById('manage-items-tab').classList.contains('active')) {
+                        loadManageItems();
+                    }
+                } else {
+                    showAlert(result.error || 'Failed to add item');
+                }
+            } catch (error) {
+                console.error('Add item error:', error);
+                showAlert('Network error. Please try again.');
+            } finally {
+                addBtn.textContent = 'Add Item';
+                addBtn.disabled = false;
+            }
+        });
+
+        // Load items for management
+        async function loadManageItems() {
+            try {
+                const response = await fetch('/api/items');
+                const items = await response.json();
+                allCurrentItems = items;
+                renderManageItems(items);
+            } catch (error) {
+                console.error('Error loading items:', error);
+                document.getElementById('manage-items').innerHTML = 
+                    '<div class="no-items">Error loading items</div>';
+            }
+        }
+
+        // Load statistics
+        async function loadStatistics() {
+            try {
+                const [currentResponse, archivedResponse, collectedResponse] = await Promise.all([
+                    fetch('/api/items'),
+                    fetch('/api/items/archived'),
+                    fetch('/api/items/collected')
+                ]);
+
+                allCurrentItems = await currentResponse.json();
+                allArchivedItems = await archivedResponse.json();
+                allCollectedItems = await collectedResponse.json();
+
+                updateAdminStatistics();
+                renderAdminChart();
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+                showAlert('Error loading statistics', 'error', 'manage-alert-container');
+            }
+        }
+
+        function renderManageItems(items) {
+            const container = document.getElementById('manage-items');
+            
+            if (items.length === 0) {
+                container.innerHTML = '<div class="no-items">No items found</div>';
+                return;
+            }
+
+            const itemsHtml = items.map(item => `
+                <div class="item-card">
+                    ${item.image_path ? 
+                        `<img src="/uploads/${item.image_path}" alt="${item.description}" class="item-image">` :
+                        `<div class="item-image" style="display: flex; align-items: center; justify-content: center; background: #f8f9fa; color: #666;">No Image</div>`
+                    }
+                    <div class="item-content">
+                        <div class="item-title">${item.description}</div>
+                        <div class="item-detail">
+                            <strong>Found at:</strong> ${item.found_location}
+                        </div>
+                        <div class="item-detail">
+                            <strong>Collect from:</strong> ${item.collection_location}
+                        </div>
+                        <div class="item-date">
+                            <strong>Added:</strong> ${formatDate(item.upload_date)}
+                        </div>
+                        <div class="admin-actions">
+                            <button class="btn btn-success btn-sm" onclick="showCollectionModal(${item.id}, '${item.description}')">
+                                Mark as Collected
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = `<div class="item-grid">${itemsHtml}</div>`;
+        }
+
+        let currentItemId = null;
+
+        // Show collection modal
+        function showCollectionModal(itemId, itemDescription) {
+            currentItemId = itemId;
+            document.getElementById('item-description').textContent = `Item: ${itemDescription}`;
+            document.getElementById('student-name').value = '';
+            document.getElementById('collection-modal').style.display = 'block';
+            document.getElementById('student-name').focus();
+        }
+
+        // Close collection modal
+        function closeCollectionModal() {
+            document.getElementById('collection-modal').style.display = 'none';
+            currentItemId = null;
+        }
+
+        // Confirm collection with student name
+        async function confirmCollection() {
+            const studentName = document.getElementById('student-name').value.trim();
+            const confirmBtn = document.getElementById('confirm-collection-btn');
+            
+            if (!studentName) {
+                showAlert('Please enter the student name', 'error', 'manage-alert-container');
+                return;
+            }
+
+            confirmBtn.textContent = 'Processing...';
+            confirmBtn.disabled = true;
+
+            try {
+                const response = await fetch(`/api/items/${currentItemId}/collect`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ collectedBy: studentName })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    closeCollectionModal();
+                    showAlert(`Item marked as collected by ${studentName}!`, 'success', 'manage-alert-container');
+                    loadManageItems(); // Refresh the list
+                } else {
+                    showAlert(result.error || 'Failed to mark item as collected', 'error', 'manage-alert-container');
+                }
+            } catch (error) {
+                console.error('Mark collected error:', error);
+                showAlert('Network error. Please try again.', 'error', 'manage-alert-container');
+            } finally {
+                confirmBtn.textContent = 'Mark as Collected';
+                confirmBtn.disabled = false;
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('collection-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'collection-modal') {
+                closeCollectionModal();
+            }
+        });
+
+        // Handle Enter key in student name input
+        document.getElementById('student-name').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                confirmCollection();
+            }
+        });
+
+        // Date filtering functions
+        function applyAdminDateFilter() {
+            const fromDate = document.getElementById('admin-date-from').value;
+            const toDate = document.getElementById('admin-date-to').value;
+            
+            if (!fromDate && !toDate) {
+                showAlert('Please select at least one date', 'error', 'manage-alert-container');
+                return;
+            }
+            
+            let filteredItems = allCurrentItems;
+            
+            if (fromDate) {
+                filteredItems = filteredItems.filter(item => 
+                    new Date(item.upload_date) >= new Date(fromDate)
+                );
+            }
+            
+            if (toDate) {
+                const toDateEnd = new Date(toDate);
+                toDateEnd.setHours(23, 59, 59, 999); // End of day
+                filteredItems = filteredItems.filter(item => 
+                    new Date(item.upload_date) <= toDateEnd
+                );
+            }
+            
+            renderManageItems(filteredItems);
+            showAlert(`Found ${filteredItems.length} items in date range`, 'success', 'manage-alert-container');
+        }
+
+        function clearAdminDateFilter() {
+            document.getElementById('admin-date-from').value = '';
+            document.getElementById('admin-date-to').value = '';
+            renderManageItems(allCurrentItems);
+            showAlert('Date filter cleared', 'success', 'manage-alert-container');
+        }
+
+        // Statistics functions
+        function updateAdminStatistics() {
+            document.getElementById('admin-total-current').textContent = allCurrentItems.length;
+            document.getElementById('admin-total-archived').textContent = allArchivedItems.length;
+            document.getElementById('admin-total-collected').textContent = allCollectedItems.length;
+        }
+
+        function renderAdminChart() {
+            const ctx = document.getElementById('adminMonthlyChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (adminMonthlyChart) {
+                adminMonthlyChart.destroy();
+            }
+            
+            const monthlyData = getAdminMonthlyStats();
+            
+            adminMonthlyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: monthlyData.labels,
+                    datasets: [{
+                        label: 'Items Lost',
+                        data: monthlyData.data,
+                        backgroundColor: 'rgba(52, 152, 219, 0.8)',
+                        borderColor: 'rgba(52, 152, 219, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function getAdminMonthlyStats() {
+            const allItems = [...allCurrentItems, ...allArchivedItems, ...allCollectedItems];
+            const monthlyCount = {};
+            
+            // Get last 6 months
+            const months = [];
+            for (let i = 5; i >= 0; i--) {
+                const date = new Date();
+                date.setMonth(date.getMonth() - i);
+                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                const monthLabel = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+                months.push({ key: monthKey, label: monthLabel });
+                monthlyCount[monthKey] = 0;
+            }
+            
+            // Count items by month
+            allItems.forEach(item => {
+                const date = new Date(item.upload_date);
+                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                if (monthlyCount.hasOwnProperty(monthKey)) {
+                    monthlyCount[monthKey]++;
+                }
+            });
+            
+            return {
+                labels: months.map(m => m.label),
+                data: months.map(m => monthlyCount[m.key])
+            };
+        }
+
+        // Password change form handler
+        document.getElementById('change-password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const changeBtn = document.getElementById('change-password-btn');
+            
+            // Validate passwords match
+            if (newPassword !== confirmPassword) {
+                showAlert('New passwords do not match', 'error', 'settings-alert-container');
+                return;
+            }
+            
+            // Validate password length
+            if (newPassword.length < 6) {
+                showAlert('New password must be at least 6 characters long', 'error', 'settings-alert-container');
+                return;
+            }
+            
+            changeBtn.textContent = 'Changing Password...';
+            changeBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/admin/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        currentPassword,
+                        newPassword
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showAlert('Password changed successfully!', 'success', 'settings-alert-container');
+                    e.target.reset();
+                } else {
+                    showAlert(result.error || 'Failed to change password', 'error', 'settings-alert-container');
+                }
+            } catch (error) {
+                console.error('Change password error:', error);
+                showAlert('Network error. Please try again.', 'error', 'settings-alert-container');
+            } finally {
+                changeBtn.textContent = 'Change Password';
+                changeBtn.disabled = false;
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Auto-focus first input
+            document.getElementById('description').focus();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "lost-found-portal",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "express": "^5.1.0",
+    "multer": "^2.0.2",
+    "path": "^0.12.7",
+    "sqlite3": "^5.1.7"
+  }
+}

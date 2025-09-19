@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lost & Found Portal</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>APCOER Lost & Found Portal</h1>
+        </header>
+
+        <nav class="nav-tabs">
+            <button class="tab-btn active" onclick="showTab('dashboard')">
+                <span>📊</span> Dashboard
+            </button>
+            <button class="tab-btn" onclick="showTab('active')">
+                <span>📋</span> Active Items
+            </button>
+            <button class="tab-btn" onclick="showTab('archive')">
+                <span>📂</span> Archive
+            </button>
+            <button class="tab-btn" onclick="showTab('stats')">
+                <span>📈</span> Statistics
+            </button>
+            <button class="tab-btn" onclick="showTab('submit')">
+                <span>➕</span> Report Lost Item
+            </button>
+            <button class="tab-btn" onclick="showTab('admin')">
+                <span>⚙️</span> Admin Panel
+            </button>
+        </nav>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard-tab" class="tab-content active">
+            <h2>College Lost & Found Dashboard</h2>
+            
+            <!-- Quick Stats Cards -->
+            <div class="dashboard-overview">
+                <div class="quick-stat-card">
+                    <div class="stat-icon">🔍</div>
+                    <div class="stat-info">
+                        <h3 id="dash-total-active">0</h3>
+                        <p>Active Items</p>
+                    </div>
+                </div>
+                <div class="quick-stat-card">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-info">
+                        <h3 id="dash-total-archived">0</h3>
+                        <p>Archived Items</p>
+                    </div>
+                </div>
+                <div class="quick-stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-info">
+                        <h3 id="dash-total-found">0</h3>
+                        <p>Items Found</p>
+                    </div>
+                </div>
+                <div class="quick-stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-info">
+                        <h3 id="dash-success-rate">0%</h3>
+                        <p>Success Rate</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="dashboard-section">
+                <h3>Recent Activity</h3>
+                <div class="recent-activity" id="recent-activity-list">
+                    <!-- Recent items will be displayed here -->
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="dashboard-section">
+                <h3>Quick Actions</h3>
+                <div class="quick-actions">
+                    <button class="btn btn-primary" onclick="showTab('submit')">
+                        📝 Report Lost Item
+                    </button>
+                    <button class="btn btn-secondary" onclick="showTab('active')">
+                        👀 View Active Items
+                    </button>
+                    <button class="btn btn-secondary" onclick="showTab('stats')">
+                        📊 View Statistics
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Item Tab -->
+        <div id="submit-tab" class="tab-content">
+            <h2>Report a Lost Item</h2>
+            <form id="lost-item-form" class="form">
+                <div class="form-group">
+                    <label for="item-name">Item Name:</label>
+                    <input type="text" id="item-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea id="description" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="category">Category:</label>
+                    <select id="category" required>
+                        <option value="">Select Category</option>
+                        <option value="electronics">Electronics</option>
+                        <option value="clothing">Clothing</option>
+                        <option value="accessories">Accessories</option>
+                        <option value="books">Books</option>
+                        <option value="keys">Keys</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="location">Location Found/Lost:</label>
+                    <input type="text" id="location" required>
+                </div>
+                <div class="form-group">
+                    <label for="contact-info">Your Contact Info:</label>
+                    <input type="text" id="contact-info" placeholder="Email or Phone" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit Lost Item</button>
+            </form>
+        </div>
+
+        <!-- Active Items Tab -->
+        <div id="active-tab" class="tab-content">
+            <h2>Active Lost Items</h2>
+            
+            <!-- Date Filter -->
+            <div class="filter-section">
+                <h3>Filter by Date</h3>
+                <div class="date-filter">
+                    <label for="date-from">From:</label>
+                    <input type="date" id="date-from">
+                    <label for="date-to">To:</label>
+                    <input type="date" id="date-to">
+                    <button onclick="applyDateFilter()" class="btn btn-secondary">Filter</button>
+                    <button onclick="clearDateFilter()" class="btn btn-secondary">Clear</button>
+                </div>
+            </div>
+
+            <div id="active-items-list" class="items-list">
+                <!-- Active items will be displayed here -->
+            </div>
+        </div>
+
+        <!-- Archive Tab -->
+        <div id="archive-tab" class="tab-content">
+            <h2>Archived Items</h2>
+            <p class="info-text">Items older than 1 month are automatically archived here.</p>
+            <div id="archived-items-list" class="items-list">
+                <!-- Archived items will be displayed here -->
+            </div>
+        </div>
+
+        <!-- Statistics Tab -->
+        <div id="stats-tab" class="tab-content">
+            <h2>Statistics</h2>
+            <div class="stats-container">
+                <div class="stats-summary">
+                    <div class="stat-card">
+                        <h3 id="total-active">0</h3>
+                        <p>Active Items</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="total-archived">0</h3>
+                        <p>Archived Items</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="total-found">0</h3>
+                        <p>Items Found</p>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h3>Items Lost Per Month</h3>
+                    <canvas id="monthlyChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Admin Panel Tab -->
+        <div id="admin-tab" class="tab-content">
+            <h2>Admin Panel</h2>
+            
+            <!-- Admin Stats Overview -->
+            <div class="admin-overview">
+                <div class="admin-section">
+                    <h3>System Overview</h3>
+                    <div class="admin-stats-grid">
+                        <div class="admin-stat-item">
+                            <span class="admin-stat-label">Total Reports:</span>
+                            <span class="admin-stat-value" id="admin-total-reports">0</span>
+                        </div>
+                        <div class="admin-stat-item">
+                            <span class="admin-stat-label">Success Rate:</span>
+                            <span class="admin-stat-value" id="admin-success-rate">0%</span>
+                        </div>
+                        <div class="admin-stat-item">
+                            <span class="admin-stat-label">Avg. Resolution Time:</span>
+                            <span class="admin-stat-value" id="admin-avg-time">0 days</span>
+                        </div>
+                        <div class="admin-stat-item">
+                            <span class="admin-stat-label">Most Lost Category:</span>
+                            <span class="admin-stat-value" id="admin-top-category">N/A</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bulk Actions -->
+            <div class="admin-section">
+                <h3>Bulk Actions</h3>
+                <div class="bulk-actions">
+                    <button class="btn btn-secondary" onclick="exportData()">
+                        💾 Export All Data
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearOldItems()">
+                        🗑️ Clear Old Items
+                    </button>
+                    <button class="btn btn-danger" onclick="resetAllData()">
+                        ⚠️ Reset All Data
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Category Management -->
+            <div class="admin-section">
+                <h3>Category Analytics</h3>
+                <div class="category-stats" id="category-analytics">
+                    <!-- Category analytics will be displayed here -->
+                </div>
+            </div>
+            
+            <!-- Recent Admin Actions -->
+            <div class="admin-section">
+                <h3>Recent Admin Actions</h3>
+                <div class="admin-log" id="admin-log">
+                    <div class="log-entry">
+                        <span class="log-time">Just now</span>
+                        <span class="log-action">Admin panel accessed</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- System Settings -->
+            <div class="admin-section">
+                <h3>System Settings</h3>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label for="auto-archive-days">Auto-archive after (days):</label>
+                        <input type="number" id="auto-archive-days" value="30" min="1" max="365">
+                    </div>
+                    <div class="setting-item">
+                        <label for="max-items-display">Max items per page:</label>
+                        <input type="number" id="max-items-display" value="20" min="5" max="100">
+                    </div>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" id="enable-notifications" checked>
+                            Enable email notifications
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <button class="btn btn-primary" onclick="saveSettings()">
+                            💾 Save Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
