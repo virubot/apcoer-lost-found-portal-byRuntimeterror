@@ -504,7 +504,7 @@ class LostFoundPortal {
         }
     }
     }
-}
+
 
 // Date filter functions
 function applyDateFilter() {
