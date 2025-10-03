@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lost & Found Portal - Student View</title>
+    <link rel="stylesheet" href="/styles.css?v=2">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>APCOER Lost & Found Portal</h1>
+            <nav class="nav">
+                <a href="/student" class="active">Student View</a>
+                <a href="/admin">Admin Login</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Tabs for Current, Archive, and Statistics -->
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('current')">Current Lost Items</button>
+            <button class="tab" onclick="showTab('archive')">Archive</button>
+            <button class="tab" onclick="showTab('stats')">Statistics</button>
+            <button class="tab" onclick="showTab('history')">Collection History</button>
+        </div>
+
+        <!-- Current Items Tab -->
+        <div id="current-tab" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    Lost Items - Available for Collection
+                </div>
+                <div class="card-body">
+                    <!-- Date Filter Section -->
+                    <div class="filter-section">
+                        <h3>Filter by Date</h3>
+                        <div class="date-filter">
+                            <label for="date-from">From:</label>
+                            <input type="date" id="date-from">
+                            <label for="date-to">To:</label>
+                            <input type="date" id="date-to">
+                            <button onclick="applyDateFilter()" class="btn btn-secondary">Filter</button>
+                            <button onclick="clearDateFilter()" class="btn btn-secondary">Clear</button>
+                        </div>
+                    </div>
+                    <div id="current-items" class="loading">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Archive Tab -->
+        <div id="archive-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    Archived Items
+                </div>
+                <div class="card-body">
+                    <div class="info-text">
+                        Items older than 1 month are automatically archived here.
+                    </div>
+                    <div id="archive-items" class="loading">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Tab -->
+        <div id="stats-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    Statistics
+                </div>
+                <div class="card-body">
+                    <div class="stats-container">
+                        <div class="stats-summary">
+                            <div class="stat-card">
+                                <h3 id="total-current">0</h3>
+                                <p>Current Items</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3 id="total-archived">0</h3>
+                                <p>Archived Items</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3 id="total-collected">0</h3>
+                                <p>Collected Items</p>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <h3>Items Lost Per Month</h3>
+                            <canvas id="monthlyChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Tab -->
+        <div id="history-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    Collection History - Already Collected Items
+                </div>
+                <div class="card-body">
+                    <div id="history-items" class="loading">Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let allCurrentItems = [];
+        let allArchivedItems = [];
+        let allCollectedItems = [];
+        let monthlyChart = null;
+
+        // Tab functionality
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+
+            // Load data based on tab
+            if (tabName === 'history' && !document.getElementById('history-items').dataset.loaded) {
+                loadHistoryItems();
+            } else if (tabName === 'archive' && !document.getElementById('archive-items').dataset.loaded) {
+                loadArchivedItems();
+            } else if (tabName === 'stats') {
+                updateStatistics();
+                renderChart();
+            }
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Render items
+        function renderItems(items, containerId, showCollectedDate = false) {
+            const container = document.getElementById(containerId);
+            
+            if (items.length === 0) {
+                container.innerHTML = '<div class="no-items">No items found</div>';
+                return;
+            }
+
+            const itemsHtml = items.map(item => `
+                <div class="item-card">
+                    ${item.image_path ? 
+                        `<img src="/uploads/${item.image_path}" alt="${item.description}" class="item-image">` :
+                        `<div class="item-image" style="display: flex; align-items: center; justify-content: center; background: #f8f9fa; color: #666;">No Image</div>`
+                    }
+                    <div class="item-content">
+                        <div class="item-title">${item.description}</div>
+                        <div class="item-detail">
+                            <strong>Found at:</strong> ${item.found_location}
+                        </div>
+                        <div class="item-detail">
+                            <strong>Collect from:</strong> ${item.collection_location}
+                        </div>
+                        <div class="item-date">
+                            <strong>Lost on:</strong> ${formatDate(item.upload_date)}
+                        </div>
+                        ${showCollectedDate ? 
+                            `<div class="item-date">
+                                <strong>Collected on:</strong> ${formatDate(item.collected_date)}
+                            </div>
+                            ${item.collected_by ? 
+                                `<div class="item-date">
+                                    <strong>Collected by:</strong> ${item.collected_by}
+                                </div>` : ''
+                            }` : ''
+                        }
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = `<div class="item-grid">${itemsHtml}</div>`;
+        }
+
+        // Load current items
+        async function loadCurrentItems() {
+            try {
+                const response = await fetch('/api/items');
+                const items = await response.json();
+                allCurrentItems = items;
+                renderItems(items, 'current-items');
+            } catch (error) {
+                console.error('Error loading current items:', error);
+                document.getElementById('current-items').innerHTML = 
+                    '<div class="no-items">Error loading items</div>';
+            }
+        }
+
+        // Load archived items
+        async function loadArchivedItems() {
+            try {
+                const response = await fetch('/api/items/archived');
+                const items = await response.json();
+                allArchivedItems = items;
+                renderItems(items, 'archive-items');
+                document.getElementById('archive-items').dataset.loaded = 'true';
+            } catch (error) {
+                console.error('Error loading archived items:', error);
+                document.getElementById('archive-items').innerHTML = 
+                    '<div class="no-items">Error loading archived items</div>';
+            }
+        }
+
+        // Load history items
+        async function loadHistoryItems() {
+            try {
+                const response = await fetch('/api/items/collected');
+                const items = await response.json();
+                allCollectedItems = items;
+                renderItems(items, 'history-items', true);
+                document.getElementById('history-items').dataset.loaded = 'true';
+            } catch (error) {
+                console.error('Error loading history items:', error);
+                document.getElementById('history-items').innerHTML = 
+                    '<div class="no-items">Error loading items</div>';
+            }
+        }
+
+        // Date filtering functions
+        function applyDateFilter() {
+            const fromDate = document.getElementById('date-from').value;
+            const toDate = document.getElementById('date-to').value;
+            
+            if (!fromDate && !toDate) {
+                showMessage('Please select at least one date', 'error');
+                return;
+            }
+            
+            let filteredItems = allCurrentItems;
+            
+            if (fromDate) {
+                filteredItems = filteredItems.filter(item => 
+                    new Date(item.upload_date) >= new Date(fromDate)
+                );
+            }
+            
+            if (toDate) {
+                const toDateEnd = new Date(toDate);
+                toDateEnd.setHours(23, 59, 59, 999); // End of day
+                filteredItems = filteredItems.filter(item => 
+                    new Date(item.upload_date) <= toDateEnd
+                );
+            }
+            
+            renderItems(filteredItems, 'current-items');
+            showMessage(`Found ${filteredItems.length} items in date range`, 'success');
+        }
+
+        function clearDateFilter() {
+            document.getElementById('date-from').value = '';
+            document.getElementById('date-to').value = '';
+            renderItems(allCurrentItems, 'current-items');
+            showMessage('Date filter cleared', 'success');
+        }
+
+        // Statistics functions
+        function updateStatistics() {
+            document.getElementById('total-current').textContent = allCurrentItems.length;
+            document.getElementById('total-archived').textContent = allArchivedItems.length;
+            document.getElementById('total-collected').textContent = allCollectedItems.length;
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('monthlyChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (monthlyChart) {
+                monthlyChart.destroy();
+            }
+            
+            const monthlyData = getMonthlyStats();
+            
+            monthlyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: monthlyData.labels,
+                    datasets: [{
+                        label: 'Items Lost',
+                        data: monthlyData.data,
+                        backgroundColor: 'rgba(52, 152, 219, 0.8)',
+                        borderColor: 'rgba(52, 152, 219, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function getMonthlyStats() {
+            const allItems = [...allCurrentItems, ...allArchivedItems, ...allCollectedItems];
+            const monthlyCount = {};
+            
+            // Get last 6 months
+            const months = [];
+            for (let i = 5; i >= 0; i--) {
+                const date = new Date();
+                date.setMonth(date.getMonth() - i);
+                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                const monthLabel = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+                months.push({ key: monthKey, label: monthLabel });
+                monthlyCount[monthKey] = 0;
+            }
+            
+            // Count items by month
+            allItems.forEach(item => {
+                const date = new Date(item.upload_date);
+                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                if (monthlyCount.hasOwnProperty(monthKey)) {
+                    monthlyCount[monthKey]++;
+                }
+            });
+            
+            return {
+                labels: months.map(m => m.label),
+                data: months.map(m => monthlyCount[m.key])
+            };
+        }
+
+        function showMessage(message, type = 'info') {
+            // Create message element
+            const messageEl = document.createElement('div');
+            messageEl.className = `message message-${type}`;
+            messageEl.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 6px;
+                color: white;
+                font-weight: 500;
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            switch(type) {
+                case 'success':
+                    messageEl.style.background = '#27ae60';
+                    break;
+                case 'error':
+                    messageEl.style.background = '#e74c3c';
+                    break;
+                default:
+                    messageEl.style.background = '#3498db';
+            }
+            
+            messageEl.textContent = message;
+            document.body.appendChild(messageEl);
+            
+            // Remove message after 3 seconds
+            setTimeout(() => {
+                messageEl.remove();
+            }, 3000);
+        }
+
+        // Auto-refresh current items every 30 seconds
+        function startAutoRefresh() {
+            setInterval(() => {
+                if (document.getElementById('current-tab').classList.contains('active')) {
+                    loadCurrentItems();
+                }
+            }, 30000);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadCurrentItems();
+            await loadArchivedItems();
+            await loadHistoryItems();
+            updateStatistics();
+            startAutoRefresh();
+        });
+    </script>
+</body>
+</html>
