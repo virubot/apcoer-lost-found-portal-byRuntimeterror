@@ -196,6 +196,36 @@ app.post('/api/auto-archive', async (req, res) => {
   }
 });
 
+// Clear collection history - reset all collected items back to active
+app.post('/api/admin/clear-collection-history', async (req, res) => {
+  try {
+    const clearedCount = await db.clearCollectionHistory();
+    res.json({ 
+      success: true, 
+      clearedCount, 
+      message: `Successfully reset ${clearedCount} collected items back to active status` 
+    });
+  } catch (error) {
+    console.error('Clear collection history error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Clear active items - delete all current active items (keep only archived)
+app.post('/api/admin/clear-active-items', async (req, res) => {
+  try {
+    const clearedCount = await db.clearActiveItems();
+    res.json({ 
+      success: true, 
+      clearedCount, 
+      message: `Successfully deleted ${clearedCount} active items (archived items preserved)` 
+    });
+  } catch (error) {
+    console.error('Clear active items error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Mark item as collected
 app.put('/api/items/:id/collect', async (req, res) => {
   try {
@@ -215,6 +245,23 @@ app.put('/api/items/:id/collect', async (req, res) => {
     }
   } catch (error) {
     console.error('Mark collected error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Delete an item
+app.delete('/api/items/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const success = await db.deleteItem(id);
+    
+    if (success) {
+      res.json({ success: true, message: 'Item deleted successfully' });
+    } else {
+      res.status(404).json({ error: 'Item not found' });
+    }
+  } catch (error) {
+    console.error('Delete item error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });

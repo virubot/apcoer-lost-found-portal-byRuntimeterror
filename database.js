@@ -204,6 +204,40 @@ class Database {
     });
   }
 
+  // Clear collection history - reset all collected items back to active
+  async clearCollectionHistory() {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        'UPDATE items SET is_collected = 0, collected_date = NULL, collected_by = NULL WHERE is_collected = 1',
+        [],
+        function(err) {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve(this.changes);
+        }
+      );
+    });
+  }
+
+  // Clear active items - delete all current active items (keep only archived)
+  async clearActiveItems() {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        'DELETE FROM items WHERE is_collected = 0 AND is_archived = 0',
+        [],
+        function(err) {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve(this.changes);
+        }
+      );
+    });
+  }
+
   // Get archived items
   async getArchivedItems() {
     return new Promise((resolve, reject) => {
@@ -234,6 +268,23 @@ class Database {
             return;
           }
           resolve(rows[0]);
+        }
+      );
+    });
+  }
+
+  // Delete a specific item by ID
+  async deleteItem(itemId) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        'DELETE FROM items WHERE id = ?',
+        [itemId],
+        function(err) {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve(this.changes > 0);
         }
       );
     });

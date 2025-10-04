@@ -97,29 +97,147 @@
 
         <!-- Statistics Tab -->
         <div id="statistics-tab" class="tab-content">
-            <div class="card">
-                <div class="card-header">
-                    Statistics Dashboard
+            <div class="stats-dashboard">
+                <!-- Main Stats Overview -->
+                <div class="stats-header">
+                    <h2>📊 Admin Analytics Dashboard</h2>
+                    <p>Comprehensive insights and management metrics</p>
                 </div>
-                <div class="card-body">
-                    <div class="stats-container">
-                        <div class="stats-summary">
-                            <div class="stat-card">
-                                <h3 id="admin-total-current">0</h3>
-                                <p>Current Items</p>
-                            </div>
-                            <div class="stat-card">
-                                <h3 id="admin-total-archived">0</h3>
-                                <p>Archived Items</p>
-                            </div>
-                            <div class="stat-card">
-                                <h3 id="admin-total-collected">0</h3>
-                                <p>Collected Items</p>
+
+                <div class="stats-grid">
+                    <!-- Primary Statistics Cards -->
+                    <div class="stat-card-primary">
+                        <div class="stat-icon">
+                            <i class="icon-current">📋</i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="admin-total-current">0</div>
+                            <div class="stat-label">Current Items</div>
+                            <div class="stat-trend" id="admin-current-trend">
+                                <span class="trend-indicator">→</span>
+                                <span class="trend-text">Active listings</span>
                             </div>
                         </div>
-                        <div class="chart-container">
-                            <h3>Items Lost Per Month</h3>
+                        <div class="stat-progress">
+                            <div class="progress-bar" id="admin-current-progress"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card-primary">
+                        <div class="stat-icon">
+                            <i class="icon-archived">🗄️</i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="admin-total-archived">0</div>
+                            <div class="stat-label">Archived Items</div>
+                            <div class="stat-trend" id="admin-archived-trend">
+                                <span class="trend-indicator">⏰</span>
+                                <span class="trend-text">Auto-archived</span>
+                            </div>
+                        </div>
+                        <div class="stat-progress">
+                            <div class="progress-bar" id="admin-archived-progress"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card-primary">
+                        <div class="stat-icon">
+                            <i class="icon-collected">✅</i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="admin-total-collected">0</div>
+                            <div class="stat-label">Collected Items</div>
+                            <div class="stat-trend" id="admin-collected-trend">
+                                <span class="trend-indicator">📈</span>
+                                <span class="trend-text">Success rate</span>
+                            </div>
+                        </div>
+                        <div class="stat-progress">
+                            <div class="progress-bar" id="admin-collected-progress"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Metrics -->
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <h4>📅 This Month</h4>
+                        </div>
+                        <div class="metric-body">
+                            <div class="metric-value" id="admin-monthly-total">0</div>
+                            <div class="metric-description">New reports</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <h4>🎯 Success Rate</h4>
+                        </div>
+                        <div class="metric-body">
+                            <div class="metric-value" id="admin-success-rate">0%</div>
+                            <div class="metric-description">Items recovered</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <h4>⏱️ Avg. Resolution</h4>
+                        </div>
+                        <div class="metric-body">
+                            <div class="metric-value" id="admin-avg-resolution">0 days</div>
+                            <div class="metric-description">Time to collect</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <h4>🔥 Most Active</h4>
+                        </div>
+                        <div class="metric-body">
+                            <div class="metric-value" id="admin-most-active">Library</div>
+                            <div class="metric-description">Common location</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-section">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>📈 Monthly Trends</h3>
+                            <div class="chart-controls">
+                                <button class="chart-btn active" onclick="switchAdminChart('monthly')">Monthly</button>
+                                <button class="chart-btn" onclick="switchAdminChart('weekly')">Weekly</button>
+                            </div>
+                        </div>
+                        <div class="chart-body">
                             <canvas id="adminMonthlyChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>🎯 Category Distribution</h3>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="adminCategoryChart" width="300" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity Timeline -->
+                <div class="activity-timeline">
+                    <div class="timeline-header">
+                        <h3>🕒 Recent Activity</h3>
+                    </div>
+                    <div class="timeline-body" id="admin-activity-timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">Admin dashboard loaded</div>
+                                <div class="timeline-time">Just now</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -151,6 +269,47 @@
                         </div>
                         <button type="submit" class="btn btn-primary" id="change-password-btn">Change Password</button>
                     </form>
+
+                    <hr style="margin: 30px 0; border: 1px solid rgba(255, 255, 255, 0.3);">
+
+                    <h3>System Management</h3>
+                    <div class="admin-actions-grid">
+                        <div class="action-card">
+                            <div class="action-icon">🔄</div>
+                            <div class="action-content">
+                                <h4>Clear Collection History</h4>
+                                <p>Reset all collected items back to active status</p>
+                                <button class="btn btn-warning" onclick="clearCollectionHistory()">Clear History</button>
+                            </div>
+                        </div>
+                        
+                        <div class="action-card">
+                            <div class="action-icon">🗑️</div>
+                            <div class="action-content">
+                                <h4>Clear Active Items</h4>
+                                <p>Remove all current active items (keep only archived)</p>
+                                <button class="btn btn-danger" onclick="clearActiveItems()">Clear Active</button>
+                            </div>
+                        </div>
+                        
+                        <div class="action-card">
+                            <div class="action-icon">🗄️</div>
+                            <div class="action-content">
+                                <h4>Run Auto-Archive</h4>
+                                <p>Manually archive items older than 1 month</p>
+                                <button class="btn btn-secondary" onclick="runAutoArchive()">Archive Now</button>
+                            </div>
+                        </div>
+                        
+                        <div class="action-card">
+                            <div class="action-icon">📊</div>
+                            <div class="action-content">
+                                <h4>Refresh Statistics</h4>
+                                <p>Update all dashboard statistics</p>
+                                <button class="btn btn-primary" onclick="refreshStatistics()">Refresh</button>
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
             </div>
@@ -315,6 +474,7 @@
                 return;
             }
 
+            // Create cards for each item
             const itemsHtml = items.map(item => `
                 <div class="item-card">
                     ${item.image_path ? 
@@ -332,9 +492,12 @@
                         <div class="item-date">
                             <strong>Added:</strong> ${formatDate(item.upload_date)}
                         </div>
-                        <div class="admin-actions">
-                            <button class="btn btn-success btn-sm" onclick="showCollectionModal(${item.id}, '${item.description}')">
+                        <div class="admin-actions" style="margin-top: 10px; display: flex; gap: 10px;">
+                            <button class="btn btn-primary" onclick="showCollectionModal('${item.id}', '${item.description.replace(/'/g, "\\'")}')">
                                 Mark as Collected
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteItem(${item.id}, '${item.description.replace(/'/g, "\\'")}')">
+                                Delete
                             </button>
                         </div>
                     </div>
@@ -452,14 +615,171 @@
             showAlert('Date filter cleared', 'success', 'manage-alert-container');
         }
 
-        // Statistics functions
+        // Enhanced Admin Statistics functions
         function updateAdminStatistics() {
+            // Update primary stats
             document.getElementById('admin-total-current').textContent = allCurrentItems.length;
             document.getElementById('admin-total-archived').textContent = allArchivedItems.length;
             document.getElementById('admin-total-collected').textContent = allCollectedItems.length;
+
+            // Update progress bars
+            updateAdminProgressBars();
+            
+            // Update additional metrics
+            updateAdminAdditionalMetrics();
+            
+            // Update activity timeline
+            updateAdminActivityTimeline();
         }
 
-        function renderAdminChart() {
+        function updateAdminProgressBars() {
+            const total = allCurrentItems.length + allArchivedItems.length + allCollectedItems.length;
+            
+            if (total > 0) {
+                const currentPercent = (allCurrentItems.length / total) * 100;
+                const archivedPercent = (allArchivedItems.length / total) * 100;
+                const collectedPercent = (allCollectedItems.length / total) * 100;
+                
+                setTimeout(() => {
+                    document.getElementById('admin-current-progress').style.width = currentPercent + '%';
+                    document.getElementById('admin-archived-progress').style.width = archivedPercent + '%';
+                    document.getElementById('admin-collected-progress').style.width = collectedPercent + '%';
+                }, 500);
+            }
+        }
+
+        function updateAdminAdditionalMetrics() {
+            // Monthly total
+            const thisMonth = new Date();
+            const thisMonthKey = `${thisMonth.getFullYear()}-${String(thisMonth.getMonth() + 1).padStart(2, '0')}`;
+            const allItems = [...allCurrentItems, ...allArchivedItems, ...allCollectedItems];
+            const monthlyTotal = allItems.filter(item => {
+                const itemDate = new Date(item.upload_date);
+                const itemMonthKey = `${itemDate.getFullYear()}-${String(itemDate.getMonth() + 1).padStart(2, '0')}`;
+                return itemMonthKey === thisMonthKey;
+            }).length;
+            document.getElementById('admin-monthly-total').textContent = monthlyTotal;
+
+            // Success rate
+            const totalItems = allItems.length;
+            const successRate = totalItems > 0 ? Math.round((allCollectedItems.length / totalItems) * 100) : 0;
+            document.getElementById('admin-success-rate').textContent = successRate + '%';
+
+            // Average resolution time
+            const avgResolution = calculateAdminAverageResolutionTime();
+            document.getElementById('admin-avg-resolution').textContent = avgResolution + ' days';
+
+            // Most active location
+            const mostActiveLocation = getAdminMostActiveLocation();
+            document.getElementById('admin-most-active').textContent = mostActiveLocation;
+        }
+
+        function calculateAdminAverageResolutionTime() {
+            if (allCollectedItems.length === 0) return 0;
+            
+            const totalDays = allCollectedItems.reduce((sum, item) => {
+                const submitted = new Date(item.upload_date);
+                const collected = new Date(item.collected_date);
+                const days = Math.ceil((collected - submitted) / (1000 * 60 * 60 * 24));
+                return sum + days;
+            }, 0);
+            
+            return Math.round(totalDays / allCollectedItems.length);
+        }
+
+        function getAdminMostActiveLocation() {
+            const allItems = [...allCurrentItems, ...allArchivedItems, ...allCollectedItems];
+            if (allItems.length === 0) return 'N/A';
+            
+            const locationCount = {};
+            allItems.forEach(item => {
+                locationCount[item.found_location] = (locationCount[item.found_location] || 0) + 1;
+            });
+            
+            return Object.keys(locationCount).reduce((a, b) => 
+                locationCount[a] > locationCount[b] ? a : b
+            );
+        }
+
+        function updateAdminActivityTimeline() {
+            const timeline = document.getElementById('admin-activity-timeline');
+            const activities = [];
+            
+            // Add recent activities
+            const recentItems = [...allCurrentItems, ...allCollectedItems]
+                .sort((a, b) => new Date(b.upload_date) - new Date(a.upload_date))
+                .slice(0, 5);
+            
+            recentItems.forEach(item => {
+                const timeAgo = getAdminTimeAgo(new Date(item.upload_date));
+                activities.push({
+                    title: `New item reported: ${item.description}`,
+                    time: timeAgo,
+                    type: 'report'
+                });
+            });
+
+            // Add collection activities
+            const recentCollections = allCollectedItems
+                .sort((a, b) => new Date(b.collected_date) - new Date(a.collected_date))
+                .slice(0, 3);
+            
+            recentCollections.forEach(item => {
+                const timeAgo = getAdminTimeAgo(new Date(item.collected_date));
+                activities.push({
+                    title: `Item collected: ${item.description}`,
+                    time: timeAgo,
+                    type: 'collection'
+                });
+            });
+
+            // Sort all activities by time
+            activities.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+            // Render timeline
+            if (activities.length === 0) {
+                timeline.innerHTML = `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">No recent activity</div>
+                            <div class="timeline-time">Admin dashboard loaded</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                timeline.innerHTML = activities.slice(0, 8).map(activity => `
+                    <div class="timeline-item">
+                        <div class="timeline-dot ${activity.type}"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">${activity.title}</div>
+                            <div class="timeline-time">${activity.time}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function getAdminTimeAgo(date) {
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            
+            if (diffInSeconds < 60) return 'Just now';
+            if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+            if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+            return `${Math.floor(diffInSeconds / 86400)} days ago`;
+        }
+
+        function switchAdminChart(type) {
+            // Update button states
+            document.querySelectorAll('.chart-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Re-render chart with new data
+            renderAdminChart(type);
+        }
+
+        function renderAdminChart(type = 'monthly') {
             const ctx = document.getElementById('adminMonthlyChart').getContext('2d');
             
             // Destroy existing chart if it exists
@@ -467,22 +787,25 @@
                 adminMonthlyChart.destroy();
             }
             
-            const monthlyData = getAdminMonthlyStats();
+            const chartData = type === 'weekly' ? getAdminWeeklyStats() : getAdminMonthlyStats();
             
             adminMonthlyChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: monthlyData.labels,
+                    labels: chartData.labels,
                     datasets: [{
                         label: 'Items Lost',
-                        data: monthlyData.data,
-                        backgroundColor: 'rgba(52, 152, 219, 0.8)',
-                        borderColor: 'rgba(52, 152, 219, 1)',
-                        borderWidth: 1
+                        data: chartData.data,
+                        backgroundColor: 'rgba(100, 149, 237, 0.8)',
+                        borderColor: 'rgba(100, 149, 237, 1)',
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        borderSkipped: false,
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
                             display: false
@@ -492,12 +815,58 @@
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                stepSize: 1
+                                stepSize: 1,
+                                color: '#6B6B8D'
+                            },
+                            grid: {
+                                color: 'rgba(100, 149, 237, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#6B6B8D'
+                            },
+                            grid: {
+                                color: 'rgba(100, 149, 237, 0.1)'
                             }
                         }
                     }
                 }
             });
+        }
+
+        function getAdminWeeklyStats() {
+            const allItems = [...allCurrentItems, ...allArchivedItems, ...allCollectedItems];
+            const weeklyCount = {};
+            
+            // Get last 4 weeks
+            const weeks = [];
+            for (let i = 3; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - (i * 7));
+                const weekKey = `Week ${4 - i}`;
+                const weekLabel = date.toLocaleDateString('default', { month: 'short', day: 'numeric' });
+                weeks.push({ key: weekKey, label: weekLabel });
+                weeklyCount[weekKey] = 0;
+            }
+            
+            // Count items by week
+            allItems.forEach(item => {
+                const itemDate = new Date(item.upload_date);
+                const now = new Date();
+                const daysDiff = Math.floor((now - itemDate) / (1000 * 60 * 60 * 24));
+                const weekIndex = Math.floor(daysDiff / 7);
+                
+                if (weekIndex >= 0 && weekIndex < 4) {
+                    const weekKey = `Week ${4 - weekIndex}`;
+                    weeklyCount[weekKey]++;
+                }
+            });
+            
+            return {
+                labels: weeks.map(w => w.label),
+                data: weeks.map(w => weeklyCount[w.key])
+            };
         }
 
         function getAdminMonthlyStats() {
@@ -582,6 +951,131 @@
                 changeBtn.disabled = false;
             }
         });
+
+        // Admin Management Functions
+        async function clearCollectionHistory() {
+            if (!confirm('Are you sure you want to clear all collection history? This will reset all collected items back to active status.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/clear-collection-history', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert(result.message || 'Collection history cleared successfully!', 'success', 'settings-alert-container');
+                    // Refresh all data
+                    setTimeout(() => {
+                        loadManageItems();
+                        loadStatistics();
+                    }, 1000);
+                } else {
+                    showAlert(result.error || 'Failed to clear collection history', 'error', 'settings-alert-container');
+                }
+            } catch (error) {
+                console.error('Clear collection history error:', error);
+                showAlert('Network error. Please try again.', 'error', 'settings-alert-container');
+            }
+        }
+
+        async function clearActiveItems() {
+            if (!confirm('Are you sure you want to clear ALL active items? This will permanently delete all current lost items (keeping only archived items).')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/clear-active-items', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert(result.message || 'Active items cleared successfully!', 'success', 'settings-alert-container');
+                    // Refresh all data
+                    setTimeout(() => {
+                        loadManageItems();
+                        loadStatistics();
+                    }, 1000);
+                } else {
+                    showAlert(result.error || 'Failed to clear active items', 'error', 'settings-alert-container');
+                }
+            } catch (error) {
+                console.error('Clear active items error:', error);
+                showAlert('Network error. Please try again.', 'error', 'settings-alert-container');
+            }
+        }
+
+        async function runAutoArchive() {
+            try {
+                const response = await fetch('/api/auto-archive', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert(`Auto-archive completed! ${result.archivedCount} items were archived.`, 'success', 'settings-alert-container');
+                    // Refresh all data
+                    setTimeout(() => {
+                        loadManageItems();
+                        loadStatistics();
+                    }, 1000);
+                } else {
+                    showAlert(result.error || 'Failed to run auto-archive', 'error', 'settings-alert-container');
+                }
+            } catch (error) {
+                console.error('Auto-archive error:', error);
+                showAlert('Network error. Please try again.', 'error', 'settings-alert-container');
+            }
+        }
+
+        function refreshStatistics() {
+            showAlert('Refreshing statistics...', 'info', 'settings-alert-container');
+            loadStatistics();
+            setTimeout(() => {
+                showAlert('Statistics refreshed successfully!', 'success', 'settings-alert-container');
+            }, 500);
+        }
+
+        // Delete item
+        async function deleteItem(itemId, description) {
+            if (!confirm(`Are you sure you want to delete this item?\n\nItem: ${description}`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/items/${itemId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showAlert('Item deleted successfully!', 'success', 'manage-alert-container');
+                    await loadManageItems(); // Refresh the items list
+                    if (document.getElementById('statistics-tab').classList.contains('active')) {
+                        await loadStatistics(); // Refresh statistics if on stats tab
+                    }
+                } else {
+                    const data = await response.json();
+                    showAlert(data.error || 'Failed to delete item', 'error', 'manage-alert-container');
+                }
+            } catch (error) {
+                console.error('Error deleting item:', error);
+                showAlert('Failed to delete item. Please try again.', 'error', 'manage-alert-container');
+            }
+        }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
