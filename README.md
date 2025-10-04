@@ -119,5 +119,5 @@ To reset data, clear browser localStorage or delete the keys manually.
 **Perfect for demonstrating all 3rd year required features!**
 
 login = admin
-password = admin247
+password = admin123
 >>>>>>> 8d377e7 (Inital commit - Lost and Found  portal)
