@@ -1,7 +1,5 @@
-<<<<<<< HEAD
-# apcoer-lost-found-portal
-Hackathon
-=======
+apcoer-lost-found-portal Hackathon
+
 # Lost & Found Portal
 
 A simple web-based Lost & Found Portal with advanced features for 3rd year teams. This is a front-end only implementation with all required 3rd year features.
